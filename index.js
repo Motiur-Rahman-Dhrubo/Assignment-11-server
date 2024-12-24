@@ -37,6 +37,13 @@ async function run() {
 
     const carCollection = client.db('carDB').collection('car');
 
+    app.get('/car', async(req, res)=> {
+        const query = { availability: "Available" };
+        const cursor = carCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+
     app.post('/car', async(req, res)=> {
         const newCar = req.body;
         console.log(newCar);
