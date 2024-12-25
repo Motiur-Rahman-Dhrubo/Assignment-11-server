@@ -1,13 +1,21 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 5000;
 
 // middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
 
 
 
@@ -36,6 +44,39 @@ async function run() {
     // await client.connect();
 
     const carCollection = client.db('carDB').collection('car');
+
+
+    // auth related APIs
+    app.post('/jwt', (req, res) =>{
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' });
+
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: false
+      })
+      .send({ success: true })
+    })
+
+    app.post('/logout', (req, res) => {
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: false
+      })
+      .send({ success: true })
+    })
+
+    app.get("/my_car", async (req, res) => {
+      const email = req.query.email;
+      let query = {};
+      if (email) {
+        query = { user_email: email };
+      }
+
+      const cursor = carCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     app.get('/available_car', async(req, res)=> {
         const query = { availability: "Available" };
