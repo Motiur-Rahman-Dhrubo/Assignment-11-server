@@ -152,6 +152,25 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/booking_car/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateDate = req.body;
+      const bookingDateData = {
+        $set: {
+          bookingDate: updateDate.newDates,
+          totalDay: updateDate.newTotalDay,
+          newBookingStatus: updateDate.newBookStatus,
+        },
+      };
+      const result = await bookingCarCollection.updateOne(
+        filter,
+        bookingDateData,
+        options
+      );
+      res.send(result);
+    });
 
     app.delete("/car/:id", async (req, res) => {
       const id = req.params.id;
