@@ -52,6 +52,7 @@ async function run() {
     // await client.connect();
 
     const carCollection = client.db("carDB").collection("car");
+    const bookingCarCollection = client.db("carDB").collection("bookingCar");
 
     // auth related APIs
     app.post("/jwt", (req, res) => {
@@ -90,6 +91,19 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/my_booking", verifyToken, async (req, res) => {
+      const email = req.query.email;
+      let query = { bookingEmail: email };
+
+      if (req.user.email !== req.query.email) {
+        return req.status(403).send({ message: "forbidden access" });
+      }
+
+      const cursor = bookingCarCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.get("/available_car", async (req, res) => {
       const query = { availability: "Available" };
       const cursor = carCollection.find(query);
@@ -106,8 +120,13 @@ async function run() {
 
     app.post("/car", async (req, res) => {
       const newCar = req.body;
-      console.log(newCar);
       const result = await carCollection.insertOne(newCar);
+      res.send(result);
+    });
+
+    app.post("/booking_car", async (req, res) => {
+      const newBookingCar = req.body;
+      const result = await bookingCarCollection.insertOne(newBookingCar);
       res.send(result);
     });
 
