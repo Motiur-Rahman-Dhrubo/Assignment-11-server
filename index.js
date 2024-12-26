@@ -111,6 +111,29 @@ async function run() {
       res.send(result);
     });
 
+    app.put("/car/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updateCar = req.body;
+      const carData = {
+        $set: {
+          car_model: updateCar.car_model,
+          car_brand: updateCar.car_brand,
+          daily_rental_price: updateCar.daily_rental_price,
+          availability: updateCar.availability,
+          vehicle_registration_number: updateCar.vehicle_registration_number,
+          features: updateCar.features,
+          description: updateCar.description,
+          location: updateCar.location,
+          image_files: updateCar.image_files,
+        },
+      };
+      const result = await carCollection.updateOne(filter, carData, options);
+      res.send(result);
+    });
+
+
     app.delete("/car/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
