@@ -91,6 +91,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/top-prices", async (req, res) => {
+      const cursor = carCollection.find().sort({ daily_rental_price: -1 }).limit(6);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.get("/my_booking", verifyToken, async (req, res) => {
       const email = req.query.email;
       let query = { bookingEmail: email };
